@@ -48,6 +48,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello Next Level Developer!");
 });
 
+// * CRUD Users
+
 app.post("/users", async (req: Request, res: Response) => {
   const { name, email } = req.body;
   try {
@@ -68,7 +70,6 @@ app.post("/users", async (req: Request, res: Response) => {
     });
   }
 });
-
 app.get("/users", async (req: Request, res: Response) => {
   try {
     const result = await pool.query(`SELECT * FROM users`);
@@ -85,7 +86,6 @@ app.get("/users", async (req: Request, res: Response) => {
     });
   }
 });
-
 app.get("/users/:id", async (req: Request, res: Response) => {
   // console.log(req.params.id);
   // res.send({message: "API is cool....."})
@@ -140,7 +140,6 @@ app.put("/users/:id", async (req: Request, res: Response) => {
     });
   }
 });
-
 app.delete("/users/:id", async (req: Request, res: Response) => {
   // console.log(req.params.id);
   try {
@@ -164,6 +163,45 @@ app.delete("/users/:id", async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: err.message,
+    });
+  }
+});
+
+//* Todos CRUD
+app.post("/todos", async (req: Request, res: Response) => {
+  const { user_id, title } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO todos(user_id, title) VALUES($1, $2) RETURNING *`,
+      [user_id, title]
+    );
+    console.log(result.rows[0]);
+    res.status(201).json({
+      success: true,
+      message: "todos inserted successfully",
+      data: result.rows[0],
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
+app.get("/todos", async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`SELECT * FROM todos`);
+    res.status(200).json({
+      success: true,
+      message: "Todos fetch successfully",
+      data: result.rows,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      details: err,
     });
   }
 });
